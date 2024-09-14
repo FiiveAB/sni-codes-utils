@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  run-vue-tests:
+  lint-and-test:
     runs-on: ubuntu-latest
 
     steps:
