@@ -1,5 +1,7 @@
 # Sni-Codes-Utils
 
+[![Push and Pull Request CI](https://github.com/FiiveAB/sni-codes-utils/actions/workflows/ci.yml/badge.svg)](https://github.com/FiiveAB/sni-codes-utils/actions/workflows/ci.yml)
+
 `sni-codes-utils` is an utility package for working with SNI (Svensk Näringsgrensindelning).
 
 It provides fast search capabilities through an indexed search and fuzzy matching fallback using Fuse.js, along with functions for validating, searching, and retrieving SNI codes.
