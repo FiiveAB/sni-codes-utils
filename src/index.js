@@ -3,6 +3,31 @@ const createFuseInstance = require('./fuse');
 
 const fuse = createFuseInstance(sniCodes);
 
+// Cache for search results
+const searchCache = new Map();
+const keywordIndex = {};
+
+// Build an index for faster keyword searches
+function buildKeywordIndex() {
+    sniCodes.forEach(sni => {
+        const words = sni.description.toLowerCase().split(' ');
+        words.forEach(word => {
+            if (!keywordIndex[word]) {
+                keywordIndex[word] = [];
+            }
+            keywordIndex[word].push(sni);
+        });
+    });
+}
+
+// Initialize the keyword index
+buildKeywordIndex();
+
+function searchWithIndex(keyword) {
+    const lowerKeyword = keyword.trim().toLowerCase();
+    return keywordIndex[lowerKeyword] || [];
+}
+
 function validateSniCode(code) {
     if (typeof code !== 'string') {
         throw new Error('SNI code must be a string');
@@ -16,16 +41,39 @@ function calculateRelevance(score) {
 
 function searchSniCodes(keyword) {
     if (!keyword || typeof keyword !== 'string' || keyword.trim().length < 2) {
-        return []; // Return early if keyword is empty, invalid, or too short
+        return [];
     }
 
-    // Perform the search
-    const results = fuse.search(keyword.trim());
-    return results.map(result => ({
+    const trimmedKeyword = keyword.trim().toLowerCase();
+
+    if (searchCache.has(trimmedKeyword)) {
+        return searchCache.get(trimmedKeyword);
+    }
+
+    const indexedResults = searchWithIndex(trimmedKeyword);
+
+    if (indexedResults.length > 0) {
+        const results = indexedResults.map(sni => ({
+            code: sni.code,
+            description: sni.description,
+            relevance: '100'  // Exact match from index
+        }));
+
+        // Cache the result
+        searchCache.set(trimmedKeyword, results);
+        return results;
+    }
+
+    // Fallback to Fuse.js search if no index matches
+    const fuseResults = fuse.search(trimmedKeyword);
+    const results = fuseResults.map(result => ({
         code: result.item.code,
         description: result.item.description,
         relevance: calculateRelevance(result.score)
     }));
+
+    searchCache.set(trimmedKeyword, results);
+    return results;
 }
 
 function getSniCodeDetails(code) {
@@ -45,17 +93,15 @@ function debounce(func, delay) {
 
 function autocomplete(keyword) {
     if (!keyword || typeof keyword !== 'string' || keyword.trim().length < 2) {
-        return []; // Return early if keyword is empty or too short
+        return [];
     }
 
     const lowerKeyword = keyword.trim().toLowerCase();
-    return sniCodes
-        .filter(sni => sni.description.toLowerCase().startsWith(lowerKeyword))
-        .slice(0, 5)  // Limit suggestions to 5 items
-        .map(sni => sni.description);
+    const results = searchWithIndex(lowerKeyword).slice(0, 5);  // Limit suggestions to 5 items
+    return results.map(sni => sni.description);
 }
 
-// Wrap the autocomplete function with debounce (e.g., 300ms delay)
+// Wrap autocomplete with debounce
 const debouncedAutocomplete = debounce(autocomplete, 300);
 
 module.exports = {
@@ -65,5 +111,3 @@ module.exports = {
     autocomplete,
     debouncedAutocomplete
 };
-
-console.log(searchSniCodes('Data'));
