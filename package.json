@@ -1,0 +1,42 @@
+{
+  "name": "sni-codes-utils",
+  "version": "1.0.0",
+  "description": "A npm package designed for working with Swedish SNI (Standard för Svensk Näringsgrensindelning) codes.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src --out-dir dist && npm run copy-json",
+    "copy-json": "cp src/sni_codes.json dist/sni_codes.json",
+    "test": "ava",
+    "start": "node src/index.js",
+    "lint": "eslint src",
+    "publish": "npm run lint && npm run test && npm run build && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FiiveAB/sni-codes-utils.git"
+  },
+  "keywords": [
+    "sni",
+    "codes",
+    "sni",
+    "koder",
+    "sni",
+    "sweden"
+  ],
+  "author": "Lucas Rosvall, Fiive AB",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FiiveAB/sni-codes-utils/issues"
+  },
+  "homepage": "https://github.com/FiiveAB/sni-codes-utils#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.25.6",
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "ava": "^6.1.3",
+    "eslint": "^9.10.0"
+  },
+  "dependencies": {
+    "fuse.js": "^7.0.0"
+  }
+}
